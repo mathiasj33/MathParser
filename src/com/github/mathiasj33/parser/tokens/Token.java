@@ -13,6 +13,10 @@ public class Token {
 		this.data = data;
 	}
 	
+	public TokenType getType() {
+		return type;
+	}
+	
 	public Object getData() {
 		return data;
 	}

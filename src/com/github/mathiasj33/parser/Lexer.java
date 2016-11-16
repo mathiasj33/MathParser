@@ -25,6 +25,7 @@ public class Lexer {
 				tokens.add(new Token(TokenType.PLUS));
 			}
 		}
+		tokens.add(new Token(TokenType.EOF));
 		return tokens;
 	}
 	

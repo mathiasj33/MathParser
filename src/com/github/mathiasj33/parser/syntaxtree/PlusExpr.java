@@ -17,6 +17,6 @@ public class PlusExpr extends Expr {
 	
 	@Override
 	public String toString() {
-		return "PlusNode";
+		return "PlusNode(" + left + ";" + right + ")";
 	}
 }
