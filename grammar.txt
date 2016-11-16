@@ -1,0 +1,4 @@
+digit ::= 0|...|9
+number ::= digit+
+
+expr ::= number | expr + expr | expr - expr | expr * expr | expr / expr | (expr)
