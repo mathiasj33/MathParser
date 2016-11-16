@@ -1,8 +1,24 @@
 package com.github.mathiasj33.parser.tokens;
 
-import com.github.mathiasj33.parser.syntaxtree.Node;
-
-public interface Token {
-	public boolean isOperator();
-	public Node getNode();
+public class Token {
+	private final TokenType type;
+	private Object data;
+	
+	public Token(TokenType type) {
+		this.type = type;
+	}
+	
+	public Token(TokenType type, Object data) {
+		this(type);
+		this.data = data;
+	}
+	
+	public Object getData() {
+		return data;
+	}
+	
+	@Override
+	public String toString() {
+		return "Token(" + type + ", " + data + ")";
+	}
 }

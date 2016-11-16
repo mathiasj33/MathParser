@@ -3,9 +3,8 @@ package com.github.mathiasj33.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.mathiasj33.parser.tokens.NumberToken;
-import com.github.mathiasj33.parser.tokens.PlusToken;
 import com.github.mathiasj33.parser.tokens.Token;
+import com.github.mathiasj33.parser.tokens.TokenType;
 
 public class Lexer {
 	
@@ -17,34 +16,15 @@ public class Lexer {
 	
 	public List<Token> getTokens() {
 		List<Token> tokens = new ArrayList<>();
-		
-		for(int i = 0; i < expr.length(); i++) {
-			char c = expr.charAt(i);
-			
-			if(c == '+') {
-				tokens.add(new PlusToken());
+		for(char c : expr.toCharArray()) {
+			if(isInt(c)) {
+				int value = Integer.parseInt(Character.toString(c));
+				tokens.add(new Token(TokenType.DIGIT, value));
 			}
-			else if(isInt(c)) {
-				String intString = Character.toString(c);
-				for(int j = i + 1; j < expr.length() + 1; j++) {
-					char exprC = 0;
-					try {
-					  exprC = expr.charAt(j);
-					} catch(IndexOutOfBoundsException e) {
-						tokens.add(new NumberToken(Integer.parseInt(intString)));
-						break;
-					}
-					if(!isInt(exprC)) {
-						i = j - 1;
-						tokens.add(new NumberToken(Integer.parseInt(intString)));
-						break;
-					}
-					intString += exprC;
-				}
-				
+			else {
+				tokens.add(new Token(TokenType.PLUS));
 			}
 		}
-		
 		return tokens;
 	}
 	

@@ -1,9 +1,9 @@
 package com.github.mathiasj33.parser.syntaxtree;
 
-public class NumberNode extends Node {
+public class NumberExpr extends Expr {
 	private final int number;
 
-	public NumberNode(int number) {
+	public NumberExpr(int number) {
 		this.number = number;
 	}
 	

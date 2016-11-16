@@ -2,7 +2,7 @@ package com.github.mathiasj33.parser.syntaxtree;
 
 import java.text.ParseException;
 
-public class PlusNode extends Node {
+public class PlusExpr extends Expr {
 	
 	@Override
 	public int evaluate() throws ParseException {
