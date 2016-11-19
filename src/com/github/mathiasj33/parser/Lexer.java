@@ -21,8 +21,17 @@ public class Lexer {
 				int value = Integer.parseInt(Character.toString(c));
 				tokens.add(new Token(TokenType.DIGIT, value));
 			}
-			else {
+			else if(c == '+'){
 				tokens.add(new Token(TokenType.PLUS));
+			}
+			else if(c == '*') {
+				tokens.add(new Token(TokenType.MULTIPLY));
+			}
+			else if(c == '(') {
+				tokens.add(new Token(TokenType.BRACKET_OPEN));
+			}
+			else if(c == ')') {
+				tokens.add(new Token(TokenType.BRACKET_CLOSE));
 			}
 		}
 		tokens.add(new Token(TokenType.EOF));
