@@ -19,12 +19,12 @@ public class Parser {
 
 	public static void main(String[] args) {
 		try {
-			new Parser().evaluate("2+3*(5+2*7+(2+3)+4+1)");
+			new Parser().evaluate("2^3*7");
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
-	// TODO: Klammerung, Minus, geteilt, kleine Sprache??
+	// TODO: Hochnehmen -> Precedence, Minus, geteilt, kleine Sprache?? Funktionen usw. dann reichts aber auch. Oder umwandeln in jasmin assembly mit grafik display?
 
 	public void evaluate(String exprString) throws ParseException {
 		List<Token> tokens = new Lexer(exprString).getTokens();
