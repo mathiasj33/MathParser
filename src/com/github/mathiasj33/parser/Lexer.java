@@ -27,6 +27,9 @@ public class Lexer {
 			else if(c == '*') {
 				tokens.add(new Token(TokenType.MULTIPLY));
 			}
+			else if(c == '^') {
+				tokens.add(new Token(TokenType.POW));
+			}
 			else if(c == '(') {
 				tokens.add(new Token(TokenType.BRACKET_OPEN));
 			}

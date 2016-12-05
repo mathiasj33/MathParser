@@ -10,6 +10,7 @@ import com.github.mathiasj33.parser.syntaxtree.Expr;
 import com.github.mathiasj33.parser.syntaxtree.MultiplyExpr;
 import com.github.mathiasj33.parser.syntaxtree.NumberExpr;
 import com.github.mathiasj33.parser.syntaxtree.PlusExpr;
+import com.github.mathiasj33.parser.syntaxtree.PowExpr;
 import com.github.mathiasj33.parser.tokens.Token;
 import com.github.mathiasj33.parser.tokens.TokenType;
 
@@ -19,17 +20,61 @@ public class Parser {
 
 	public static void main(String[] args) {
 		try {
-			new Parser().evaluate("2+3*(5+2*7+(2+3)+4+1)");
+			new Parser().evaluate("2+5*3^2");
 		} catch (ParseException e) {
 			e.printStackTrace();
-		}
+		} // Für jede Klammerung: Unterstack, der gleich ausgewertet wird.
+			// Auflösen: Keine Klammern -> Hoch sofort, dann Mal, dann Plus
 	}
 	// TODO: Klammerung, Minus, geteilt, kleine Sprache??
 
 	public void evaluate(String exprString) throws ParseException {
 		List<Token> tokens = new Lexer(exprString).getTokens();
-		Expr expr = parseTokens(tokens);
+		System.out.println(tokens);
+		Expr expr = parseTokens1(tokens);
 		System.out.println(expr.evaluate());
+	}
+
+	private Expr parseTokens1(List<Token> tokens) throws ParseException {
+		// TODO: mehrere Digits beachten
+		List<Expr> exprs = new ArrayList<>();
+
+		for (int i = 0; i < tokens.size(); i++) {
+			Token token = tokens.get(i);
+
+			switch (token.getType()) {
+			case DIGIT: {
+				exprs.add(new NumberExpr((int) token.getData()));
+				break;
+			}
+			case PLUS: {
+				exprs.add(new PlusExpr());
+				break;
+			}
+			case MULTIPLY: {
+				exprs.add(new MultiplyExpr());
+				break;
+			}
+			case POW: {
+				exprs.add(new PowExpr());
+				break;
+			}
+			}
+		}
+
+		System.out.println(exprs);
+		
+		for (int i = 0; i < exprs.size(); i++) {
+			Expr expr = exprs.get(i);
+			if (expr instanceof PowExpr) {
+				NumberExpr left = (NumberExpr) exprs.get(i-1);
+				NumberExpr right = (NumberExpr) exprs.get(i+1);
+				expr.setLeft(left);
+				expr.setRight(right);
+			}
+		}
+		
+		return exprs.get(0);
 	}
 
 	private Expr parseTokens(List<Token> tokens) throws ParseException {
@@ -86,16 +131,16 @@ public class Parser {
 		while (!((previous = stack.pop()) instanceof BracketOpenExpr)) {
 			enclosedExprs.add(previous);
 		}
-		
+
 		Stack<Expr> enclosedStack = new Stack<>();
-		for(int i = enclosedExprs.size() - 1; i >= 0; i--) {
+		for (int i = enclosedExprs.size() - 1; i >= 0; i--) {
 			enclosedStack.push(enclosedExprs.get(i));
 		}
-		
+
 		reduceStack(enclosedStack);
 		stack.push(enclosedStack.pop());
 	}
-	
+
 	private void reduceStack(Stack<Expr> stack) {
 		while (stack.size() > 1) {
 			Expr right = stack.pop();
@@ -105,8 +150,7 @@ public class Parser {
 				curr.setRight(right);
 				stack.push(curr);
 				System.out.println("Reduce: " + stack);
-			}
-			else {
+			} else {
 				stack.push(curr);
 				stack.push(right);
 				return;
