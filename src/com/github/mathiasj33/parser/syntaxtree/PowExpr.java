@@ -4,14 +4,22 @@ import java.text.ParseException;
 
 public class PowExpr extends Expr {
 
-	@Override
-	public int evaluate() throws ParseException {
-		return (int) Math.pow(left.evaluate(), right.evaluate());
-	}
+    public PowExpr() {
+        precedence = 2;
+    }
 
-	@Override
-	public boolean isOperator() {
-		return true;
-	}
+    @Override
+    public int evaluate() throws ParseException {
+        return (int) Math.pow(left.evaluate(), right.evaluate());
+    }
 
+    @Override
+    public boolean isOperator() {
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "PowNode(" + left + ";" + right + ")";
+    }
 }
