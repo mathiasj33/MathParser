@@ -4,8 +4,6 @@ import java.text.ParseException;
 
 public abstract class Expr {
 
-    public final static int MAX_PRECEDENCE = 2;
-
     protected Expr left;
     protected Expr right;
     protected int precedence = 0;
