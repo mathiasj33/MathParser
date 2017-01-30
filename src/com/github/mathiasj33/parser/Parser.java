@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import com.github.mathiasj33.parser.syntaxtree.BracketOpenExpr;
 import com.github.mathiasj33.parser.syntaxtree.Expr;
 import com.github.mathiasj33.parser.syntaxtree.MultiplyExpr;
 import com.github.mathiasj33.parser.syntaxtree.NumberExpr;
 import com.github.mathiasj33.parser.syntaxtree.PlusExpr;
 import com.github.mathiasj33.parser.syntaxtree.PowExpr;
 import com.github.mathiasj33.parser.tokens.Token;
-import com.github.mathiasj33.parser.tokens.TokenType;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Parser {
 
@@ -20,7 +20,7 @@ public class Parser {
 
     public static void main(String[] args) {
         try {
-            new Parser().evaluate("2+5*3^2");
+            new Parser().evaluate("2+5*3^2");  //47   2+5^3*2
         } catch (ParseException e) {
             e.printStackTrace();
         } // Für jede Klammerung: Unterstack, der gleich ausgewertet wird.
@@ -31,7 +31,16 @@ public class Parser {
     public void evaluate(String exprString) throws ParseException {
         List<Token> tokens = new Lexer(exprString).getTokens();
         System.out.println(tokens);
-        Expr expr = parseTokens1(tokens);
+//        Expr expr = parseTokens1(tokens);
+        Queue<Expr> queue = new LinkedList<>();
+        queue.add(new PlusExpr());
+        queue.add(new NumberExpr(2));
+        queue.add(new MultiplyExpr());
+        queue.add(new PowExpr());
+        queue.add(new NumberExpr(5));
+        queue.add(new NumberExpr(3));
+        queue.add(new NumberExpr(2));
+        Expr expr = getTopExpr(queue);
         System.out.println(expr.evaluate());
     }
 
@@ -66,96 +75,99 @@ public class Parser {
 
         for (int i = 0; i < exprs.size(); i++) {
             Expr expr = exprs.get(i);
-            if (expr instanceof PowExpr) {
-                NumberExpr left = (NumberExpr) exprs.get(i - 1);
-                NumberExpr right = (NumberExpr) exprs.get(i + 1);
-                expr.setLeft(left);
-                expr.setRight(right);
-            }
+            //TODO: create stack of exprs
         }
 
         return exprs.get(0);
     }
 
-    private Expr parseTokens(List<Token> tokens) throws ParseException {
-        for (int i = 0; i < tokens.size(); i++) {
-            System.out.println(stack);
-            Token token = tokens.get(i);
-            Token next = null;
-            if (i < tokens.size() - 1) {
-                next = tokens.get(i + 1);
-            }
-
-            switch (token.getType()) {
-                case DIGIT: {
-                    if (next.getType() == TokenType.DIGIT) {
-                        stack.push(new NumberExpr((int) token.getData()));
-                    } else {
-                        String s = "" + token.getData();
-                        while (!stack.isEmpty() && !stack.peek().isOperator()) {
-                            s = stack.pop().evaluate() + s;
-                        }
-                        stack.push(new NumberExpr(Integer.parseInt(s)));
-                    }
-                    break;
-                }
-                case PLUS: {
-                    reduceStack();
-                    stack.push(new PlusExpr());
-                    break;
-                }
-                case MULTIPLY:
-                    stack.push(new MultiplyExpr());
-                    break;
-                case BRACKET_OPEN:
-                    stack.push(new BracketOpenExpr());
-                    break;
-                case BRACKET_CLOSE:
-                    reduceBracket();
-                    break;
-                case EOF: {
-                    reduceStack();
-                    return stack.pop();
-                }
-            }
-        }
-        return null;
+    private Expr getTopExpr(Queue<Expr> queue) {
+        Expr expr = queue.poll();
+        if(!expr.isOperator()) return expr;
+        expr.setLeft(getTopExpr(queue));
+        expr.setRight(getTopExpr(queue));
+        return expr;
     }
-
-    private void reduceStack() {
-        reduceStack(stack);
-    }
-
-    private void reduceBracket() {
-        List<Expr> enclosedExprs = new ArrayList<>();
-        Expr previous;
-        while (!((previous = stack.pop()) instanceof BracketOpenExpr)) {
-            enclosedExprs.add(previous);
-        }
-
-        Stack<Expr> enclosedStack = new Stack<>();
-        for (int i = enclosedExprs.size() - 1; i >= 0; i--) {
-            enclosedStack.push(enclosedExprs.get(i));
-        }
-
-        reduceStack(enclosedStack);
-        stack.push(enclosedStack.pop());
-    }
-
-    private void reduceStack(Stack<Expr> stack) {
-        while (stack.size() > 1) {
-            Expr right = stack.pop();
-            Expr curr = stack.pop();
-            if (curr.isOperator() && !(curr instanceof BracketOpenExpr)) {
-                curr.setLeft(stack.pop());
-                curr.setRight(right);
-                stack.push(curr);
-                System.out.println("Reduce: " + stack);
-            } else {
-                stack.push(curr);
-                stack.push(right);
-                return;
-            }
-        }
-    }
+    
+//    private Expr parseTokens(List<Token> tokens) throws ParseException {
+//        for (int i = 0; i < tokens.size(); i++) {
+//            System.out.println(stack);
+//            Token token = tokens.get(i);
+//            Token next = null;
+//            if (i < tokens.size() - 1) {
+//                next = tokens.get(i + 1);
+//            }
+//
+//            switch (token.getType()) {
+//                case DIGIT: {
+//                    if (next.getType() == TokenType.DIGIT) {
+//                        stack.push(new NumberExpr((int) token.getData()));
+//                    } else {
+//                        String s = "" + token.getData();
+//                        while (!stack.isEmpty() && !stack.peek().isOperator()) {
+//                            s = stack.pop().evaluate() + s;
+//                        }
+//                        stack.push(new NumberExpr(Integer.parseInt(s)));
+//                    }
+//                    break;
+//                }
+//                case PLUS: {
+//                    reduceStack();
+//                    stack.push(new PlusExpr());
+//                    break;
+//                }
+//                case MULTIPLY:
+//                    stack.push(new MultiplyExpr());
+//                    break;
+//                case BRACKET_OPEN:
+//                    stack.push(new BracketOpenExpr());
+//                    break;
+//                case BRACKET_CLOSE:
+//                    reduceBracket();
+//                    break;
+//                case EOF: {
+//                    reduceStack();
+//                    return stack.pop();
+//                }
+//            }
+//        }
+//        return null;
+//    }
+//
+//    private void reduceStack() {
+//        reduceStack(stack);
+//    }
+//
+//    private void reduceBracket() {
+//        List<Expr> enclosedExprs = new ArrayList<>();
+//        Expr previous;
+//        while (!((previous = stack.pop()) instanceof BracketOpenExpr)) {
+//            enclosedExprs.add(previous);
+//        }
+//
+//        Stack<Expr> enclosedStack = new Stack<>();
+//        for (int i = enclosedExprs.size() - 1; i >= 0; i--) {
+//            enclosedStack.push(enclosedExprs.get(i));
+//        }
+//
+//        reduceStack(enclosedStack);
+//        stack.push(enclosedStack.pop());
+//    }
+//
+//    private void reduceStack(Stack<Expr> stack) {
+//        while (stack.size() > 1) {
+//            Expr right = stack.pop();
+//            Expr curr = stack.pop();
+//            if (curr.isOperator() && !(curr instanceof BracketOpenExpr)) {
+//                curr.setLeft(stack.pop());
+//                curr.setRight(right);
+//                stack.push(curr);
+//                System.out.println("Reduce: " + stack);
+//            } else {
+//                stack.push(curr);
+//                stack.push(right);
+//                return;
+//            }
+//        }
+//    }
 }
