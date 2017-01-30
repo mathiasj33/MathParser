@@ -26,7 +26,7 @@ public class Parser {
         } // Für jede Klammerung: Unterstack, der gleich ausgewertet wird.
         // Auflösen: Keine Klammern -> Hoch sofort, dann Mal, dann Plus
     }
-    // TODO: Hochnehmen -> Precedence, Minus, geteilt, kleine Sprache?? Funktionen usw. dann reichts aber auch. Oder umwandeln in jasmin assembly mit grafik display?
+    // TODO: Hochnehmen -> Precedence, Minus, geteilt, negative Werte, kleine Sprache?? Funktionen usw. dann reichts aber auch. Oder umwandeln in jasmin assembly mit grafik display?
 
     public void evaluate(String exprString) throws ParseException {
         List<Token> tokens = new Lexer(exprString).getTokens();
