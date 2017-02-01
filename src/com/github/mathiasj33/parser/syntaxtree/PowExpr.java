@@ -5,7 +5,7 @@ import java.text.ParseException;
 public class PowExpr extends Expr {
 
     public PowExpr() {
-        precedence = 2;
+        precedence = 3;
     }
 
     @Override

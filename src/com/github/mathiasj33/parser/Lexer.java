@@ -22,8 +22,12 @@ public class Lexer {
                 tokens.add(new Token(TokenType.DIGIT, value));
             } else if (c == '+') {
                 tokens.add(new Token(TokenType.PLUS));
-            } else if (c == '*') {
+            } else if (c == '-') {
+                tokens.add(new Token(TokenType.MINUS));
+            }else if (c == '*') {
                 tokens.add(new Token(TokenType.MULTIPLY));
+            } else if (c == '/') {
+                tokens.add(new Token(TokenType.DIVIDE));
             } else if (c == '^') {
                 tokens.add(new Token(TokenType.POW));
             } else if (c == '(') {
@@ -33,6 +37,7 @@ public class Lexer {
             }
         }
         tokens.add(new Token(TokenType.EOF));
+        
         return tokens;
     }
 

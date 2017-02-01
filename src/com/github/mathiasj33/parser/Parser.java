@@ -1,6 +1,8 @@
 package com.github.mathiasj33.parser;
 
+import com.github.mathiasj33.parser.syntaxtree.BinaryMinusExpr;
 import com.github.mathiasj33.parser.syntaxtree.BracketExpr;
+import com.github.mathiasj33.parser.syntaxtree.DivideExpr;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ import com.github.mathiasj33.parser.syntaxtree.MultiplyExpr;
 import com.github.mathiasj33.parser.syntaxtree.NumberExpr;
 import com.github.mathiasj33.parser.syntaxtree.PlusExpr;
 import com.github.mathiasj33.parser.syntaxtree.PowExpr;
+import com.github.mathiasj33.parser.syntaxtree.UnaryMinusExpr;
 import com.github.mathiasj33.parser.tokens.Token;
 import com.github.mathiasj33.parser.tokens.TokenType;
 import java.util.LinkedList;
@@ -19,12 +22,12 @@ public class Parser {
 
     public static void main(String[] args) {
         try {
-            new Parser().evaluate("2+(3*5)^4");  //47   2*(3+5)
+            new Parser().evaluate("-5*3^2");
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
-    // TODO: Hochnehmen -> Precedence, Minus, geteilt, negative Werte, kleine Sprache?? Funktionen usw. dann reichts aber auch. Oder umwandeln in jasmin assembly mit grafik display?
+    // TODO: kleine Sprache?? Funktionen usw. dann reichts aber auch. Oder umwandeln in jasmin assembly mit grafik display?
 
     public void evaluate(String exprString) throws ParseException {
         List<Token> tokens = new Lexer(exprString).getTokens();
@@ -40,7 +43,7 @@ public class Parser {
             switch (token.getType()) {
                 case DIGIT: {
                     String digitString = "" + (int) token.getData();
-                    while(tokens.get(++i).getType() == TokenType.DIGIT) {
+                    while (tokens.get(++i).getType() == TokenType.DIGIT) {
                         digitString += (int) tokens.get(i).getData();
                     }
                     exprs.add(new NumberExpr(Integer.parseInt(digitString)));
@@ -51,8 +54,20 @@ public class Parser {
                     exprs.add(new PlusExpr());
                     break;
                 }
+                case MINUS: {
+                    if(exprs.size() == 0 || exprs.get(exprs.size() - 1).isOperator()) {
+                        exprs.add(new UnaryMinusExpr());
+                    } else {
+                        exprs.add(new BinaryMinusExpr());
+                    }
+                    break;
+                }
                 case MULTIPLY: {
                     exprs.add(new MultiplyExpr());
+                    break;
+                }
+                case DIVIDE: {
+                    exprs.add(new DivideExpr());
                     break;
                 }
                 case POW: {
@@ -61,11 +76,11 @@ public class Parser {
                 }
                 case BRACKET_OPEN: {
                     List<Token> bracketedTokens = new ArrayList<>();
-                    while(tokens.get(++i).getType() != TokenType.BRACKET_CLOSE) {
+                    while (tokens.get(++i).getType() != TokenType.BRACKET_CLOSE) {
                         bracketedTokens.add(tokens.get(i));
                     }
                     bracketedTokens.add(new Token(TokenType.EOF));
-                    
+
                     BracketExpr bracket = new BracketExpr();
                     bracket.setLeft(parseTokens(bracketedTokens));
                     exprs.add(bracket);
@@ -82,14 +97,17 @@ public class Parser {
 
         Expr lowestPrecedence = getLowestPrecedenceExpr(exprs);
         queue.add(lowestPrecedence);
-        
-        if(lowestPrecedence instanceof NumberExpr) return queue;
-        else if(lowestPrecedence instanceof BracketExpr) return queue;
+
+        if (lowestPrecedence instanceof NumberExpr)
+            return queue;
+        else if (lowestPrecedence instanceof BracketExpr)
+            return queue;
         int pos = exprs.indexOf(lowestPrecedence);
-        
-        queue.addAll(parseExprs(exprs.subList(0, pos)));
+
+        if (!(lowestPrecedence instanceof UnaryMinusExpr))
+            queue.addAll(parseExprs(exprs.subList(0, pos)));
         queue.addAll(parseExprs(exprs.subList(pos + 1, exprs.size())));
-        
+
         return queue;
     }
 
@@ -104,7 +122,8 @@ public class Parser {
         if (!expr.isOperator())
             return expr;
         expr.setLeft(getTopExpr(queue));
-        expr.setRight(getTopExpr(queue));
+        if (!(expr instanceof UnaryMinusExpr))
+            expr.setRight(getTopExpr(queue));
         return expr;
     }
 }

@@ -5,7 +5,7 @@ import java.text.ParseException;
 public class BracketExpr extends Expr {
 
     public BracketExpr() {
-        precedence = 3;
+        precedence = 4;
     }
     
     @Override
